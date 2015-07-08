@@ -447,11 +447,28 @@ namespace MissionPlanner.GCSViews.ConfigurationView
             joy.Show();
         }
 
+        Form key = null;
+
         private void BUT_Keyboard_Click(object sender, EventArgs e)
         {
-            Form key = new Keyboard.KeyboardSetup();
-            ThemeManager.ApplyThemeTo(key);
-            key.Show();
+            if (key == null)
+            {
+                key = new Keyboard.KeyboardSetup();
+                ThemeManager.ApplyThemeTo(key);
+                key.FormClosed += new FormClosedEventHandler(key_FormClosed);
+                key.Show();
+            }
+            else
+            {
+                if (key.WindowState == FormWindowState.Minimized || key.WindowState == FormWindowState.Maximized)
+                    key.WindowState = FormWindowState.Normal;
+                key.Focus();
+            }           
+        }
+
+        void key_FormClosed(object sender, EventArgs e)
+        {
+            key = null;
         }
 
         private void CMB_distunits_SelectedIndexChanged(object sender, EventArgs e)
