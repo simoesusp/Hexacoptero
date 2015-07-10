@@ -16,7 +16,11 @@ namespace MissionPlanner.Keyboard
 {
     public partial class KeyboardSetup : Form
     {
-        globalKeyboardHook gkh = new globalKeyboardHook();        
+
+        [DllImport("user32.dll")]
+        static extern bool HideCaret(IntPtr hWnd);
+
+        globalKeyboardHook gkh = new globalKeyboardHook();
 
         public KeyboardSetup()
         {
@@ -25,141 +29,144 @@ namespace MissionPlanner.Keyboard
         }
 
         public void Keyboard_Load(object sender, EventArgs e)
-        {            
-            gkh.HookedKeys.Add(Keys.Left);
-            gkh.HookedKeys.Add(Keys.Right);
-            gkh.HookedKeys.Add(Keys.Up);
-            gkh.HookedKeys.Add(Keys.Down);
-            gkh.HookedKeys.Add(Keys.PageUp);
-            gkh.HookedKeys.Add(Keys.PageDown);
-            gkh.HookedKeys.Add(Keys.Escape);
-            gkh.HookedKeys.Add(Keys.W);
-            gkh.HookedKeys.Add(Keys.S);
-            gkh.HookedKeys.Add(Keys.A);
-            gkh.HookedKeys.Add(Keys.D);
-            gkh.KeyDown += new KeyEventHandler(gkh_KeyDown);
-            gkh.KeyUp += new KeyEventHandler(gkh_KeyUp);    
-            
+        {   
+
             if (MainV2.keyboard)
             {
                 BUT_enable.Text = "Disable";
-                timer1.Start();
             }
         }
 
         private void BUT_enable_Click(object sender, EventArgs e)
-        {
-            if (MainV2.keyboard == false)
+        {          
+
+            if (!MainV2.keyboard)
             {
                 MainV2.comPort.MAV.cs.rcoverridech1 = checkChannel(1, "trim");
                 MainV2.comPort.MAV.cs.rcoverridech2 = checkChannel(2, "trim");
-                MainV2.comPort.MAV.cs.rcoverridech3 = checkChannel(3, "trim");
+                MainV2.comPort.MAV.cs.rcoverridech3 = checkChannel(3, "min");
                 MainV2.comPort.MAV.cs.rcoverridech4 = checkChannel(4, "trim");
+                try
+                {
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), accelerateBox.Text, true));
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), decelerateBox.Text, true));
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), rollLeftBox.Text, true));
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), rollRightBox.Text, true));
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), steerLeftBox.Text, true));
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), steerRightBox.Text, true));
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), pitchForwardBox.Text, true));
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), pitchBackwardBox.Text, true));
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), armBox.Text, true));
+                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), desarmBox.Text, true));
+                }
+                catch 
+                {
+                    MainV2.instance.Invoke((System.Action)
+                    delegate
+                    {
+                        CustomMessageBox.Show("Please insert a key in all boxes before pressing enable", "Empty Boxes");
+                    });
+                    return;
+                }
+                gkh.KeyDown += new KeyEventHandler(gkh_KeyDown);
+                gkh.KeyUp += new KeyEventHandler(gkh_KeyUp);
                 gkh.hook();
                 MainV2.keyboard = true;
                 BUT_enable.Text = "Disable";
+                timer1.Start();
+                
             }
             else
             {
+                gkh.KeyDown -= new KeyEventHandler(gkh_KeyDown);
+                gkh.KeyUp -= new KeyEventHandler(gkh_KeyUp);
+                gkh.HookedKeys.Clear();
                 gkh.unhook();
                 MainV2.keyboard = false;
                 clearRCOverride();
+                timer1.Stop();
                 BUT_enable.Text = "Enable";
             }
         }
 
         void gkh_KeyUp(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode)
+
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), rollLeftBox.Text, true))
             {
-                case Keys.Left:
-                    MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(1500);
-                    break;
-                case Keys.Right:
-                    MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(1500);
-                    break;
-                case Keys.Up:
-                    MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(1500);
-                    break;
-                case Keys.Down:
-                    MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(1500);
-                    break;
-                case Keys.W:
-                    MainV2.comPort.MAV.cs.rcoverridech3 = (ushort)(1425);
-                    break;
-                case Keys.S:
-                    MainV2.comPort.MAV.cs.rcoverridech3 = (ushort)(1425);
-                    break;
-                case Keys.A:
-                    MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(1500);
-                    break;
-                case Keys.D:
-                    MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(1500);
-                    break;
+                MainV2.comPort.MAV.cs.rcoverridech1 = checkChannel(1,"trim");
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), rollRightBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech1 = checkChannel(1, "trim");
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), pitchForwardBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech2 = checkChannel(2, "trim");
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), pitchBackwardBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech2 = checkChannel(2, "trim");
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), steerLeftBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech4 = checkChannel(4, "trim");
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), steerRightBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech4 = checkChannel(4, "trim");
             }
        
         }
 
-        void gkh_KeyDown(object sender, KeyEventArgs e) 
+        void gkh_KeyDown(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode)
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), armBox.Text, true))
             {
-                case Keys.PageUp:
-                    MainV2.instance.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate()
+                MainV2.instance.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate()
+                {
+                    try
                     {
-                        try
-                        {
-                            MainV2.comPort.doARM(true);
-                        }
-                        catch { CustomMessageBox.Show("Failed to Arm"); }
-                    });
-                    break;
-                case Keys.Left:
-                    /*if (MainV2.comPort.MAV.cs.rcoverridech1 > checkChannel(1, "min"))
-                        MainV2.comPort.MAV.cs.rcoverridech1 -= (ushort)(100);*/
-                    MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(1400);
-                    break;
-                case Keys.Right:
-                    /*if (MainV2.comPort.MAV.cs.rcoverridech1 < checkChannel(1, "max"))
-                        MainV2.comPort.MAV.cs.rcoverridech1 += (ushort)(100);*/
-                    MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(1600);
-                    break;
-                case Keys.Up:
-                    /*if (MainV2.comPort.MAV.cs.rcoverridech2 > checkChannel(2, "min"))
-                        MainV2.comPort.MAV.cs.rcoverridech2 -= (ushort)(100);*/
-                    MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(1400);
-                    break;
-                case Keys.Down:
-                    /*if (MainV2.comPort.MAV.cs.rcoverridech2 < checkChannel(2, "max"))
-                        MainV2.comPort.MAV.cs.rcoverridech2 += (ushort)(100);*/
-                    MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(1600);
-                    break;
-                case Keys.W:
-                    if (MainV2.comPort.MAV.cs.rcoverridech3 < checkChannel(3, "max"))
-                        MainV2.comPort.MAV.cs.rcoverridech3 += (ushort)(100);
-                    break;
-                case Keys.S:
-                    if (MainV2.comPort.MAV.cs.rcoverridech3 > checkChannel(3, "min"))
-                        MainV2.comPort.MAV.cs.rcoverridech3 -= (ushort)(100);
-                    break;
-                case Keys.A:
-                    /*if (MainV2.comPort.MAV.cs.rcoverridech4 > checkChannel(4, "min"))
-                        MainV2.comPort.MAV.cs.rcoverridech4 -= (ushort)(100);*/
-                    MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(1400);
-                    break;
-                case Keys.D:
-                    /*if (MainV2.comPort.MAV.cs.rcoverridech4 < checkChannel(4, "max"))
-                        MainV2.comPort.MAV.cs.rcoverridech4 += (ushort)(100);*/
-                    MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(1600);
-                    break;
-                case Keys.Escape:
-                    MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)0;
-                    MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)0;
-                    MainV2.comPort.MAV.cs.rcoverridech3 = (ushort)0;
-                    MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)0;
-                    clearRCOverride();
-                    break;
-            }            
+                        MainV2.comPort.doARM(true);
+                    }
+                    catch { CustomMessageBox.Show("Failed to Arm"); }
+                });
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), rollLeftBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(checkChannel(1, "trim") - Convert.ToUInt16(rollTrackBar.Value));
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), rollRightBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(checkChannel(1, "trim") + Convert.ToUInt16(rollTrackBar.Value));
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), pitchForwardBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(checkChannel(2, "trim") - Convert.ToUInt16(pitchTrackBar.Value));
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), pitchBackwardBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(checkChannel(2, "trim") + Convert.ToUInt16(pitchTrackBar.Value));
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), accelerateBox.Text, true))
+            {
+                if (MainV2.comPort.MAV.cs.rcoverridech3 < checkChannel(3, "max"))
+                    MainV2.comPort.MAV.cs.rcoverridech3 += (ushort)(100);
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), decelerateBox.Text, true))
+            {
+                if (MainV2.comPort.MAV.cs.rcoverridech3 > checkChannel(3, "min"))
+                    MainV2.comPort.MAV.cs.rcoverridech3 -= (ushort)(100);
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), steerLeftBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(checkChannel(4, "trim") - Convert.ToUInt16(yawTrackBar.Value));
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), steerRightBox.Text, true))
+            {
+                MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(checkChannel(4, "trim") + Convert.ToUInt16(yawTrackBar.Value));
+            }
+
         }
 
         public void clearRCOverride()
@@ -187,6 +194,7 @@ namespace MissionPlanner.Keyboard
             }
             catch { }
         }
+
 
         private ushort checkChannel(int chan, string minmaxtrim)
         {
@@ -360,6 +368,90 @@ namespace MissionPlanner.Keyboard
                 //Exception Error in the application. -2147024866 (DIERR_INPUTLOST)
 
             }
+
+            try
+            {
+                rollTrackBar.Maximum = (checkChannel(1, "max")- checkChannel(1, "min"))/2;
+                pitchTrackBar.Maximum = (checkChannel(2, "max") - checkChannel(2, "min"))/2;
+                yawTrackBar.Maximum = (checkChannel(4, "max") - checkChannel(4, "min"))/2;
+                rollTrackBarMaxValue.Text = rollTrackBar.Maximum.ToString();
+                pitchTrackBarMaxValue.Text = pitchTrackBar.Maximum.ToString();
+                yawTrackBarMaxValue.Text = yawTrackBar.Maximum.ToString();
+
+                rollTrackBar.Minimum = 100;
+                pitchTrackBar.Minimum = 100;
+                yawTrackBar.Minimum = 100;
+                rollTrackBarMinValue.Text = rollTrackBar.Minimum.ToString();
+                pitchTrackBarMinValue.Text = pitchTrackBar.Minimum.ToString();
+                yawTrackBarMinValue.Text = yawTrackBar.Minimum.ToString();
+
+            }
+            catch
+            {
+                //Exception Error in the application. -2147024866 (DIERR_INPUTLOST)
+
+            }
         }
+
+        string auxText;
+
+        public void allTextBox_Click(object sender, EventArgs e)
+        {
+            TextBox tbox = (TextBox)sender;
+            auxText = tbox.Text;
+            if (!MainV2.keyboard)
+            {
+                tbox.Cursor = Cursors.Default;
+                if (tbox.ReadOnly)
+                {
+                    tbox.ReadOnly = false;
+                    tbox.Text = string.Empty;
+                    tbox.BackColor = TextBox.DefaultBackColor;
+                    tbox.ForeColor = TextBox.DefaultForeColor;
+                }
+            }
+            HideCaret(tbox.Handle);
+            
+        }
+
+        private void allTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            TextBox tbox = (TextBox)sender;
+            if(!tbox.ReadOnly)
+            {
+                if(e.KeyCode == Keys.Escape)                
+                    tbox.Text = auxText;                
+                else
+                    tbox.AppendText(e.KeyCode.ToString());
+                tbox.BackColor = ThemeManager.ControlBGColor;
+                tbox.ForeColor = ThemeManager.TextColor;
+                tbox.ReadOnly = true;
+            }
+        }
+
+        private void allTextBox_Leave(object sender, EventArgs e)
+        {
+            TextBox tbox = (TextBox)sender;
+            if (!tbox.ReadOnly)
+            {
+                tbox.Text = auxText;
+                tbox.BackColor = ThemeManager.ControlBGColor;
+                tbox.ForeColor = ThemeManager.TextColor;
+                tbox.ReadOnly = true;
+            }
+        }
+
+        private void allTextBox_MouseEnter(object sender, EventArgs e)
+        {
+            TextBox tbox = (TextBox)sender;
+            if (MainV2.keyboard)
+            {
+                tbox.Cursor = Cursors.No;
+            }
+            if (!MainV2.keyboard)
+            {
+                tbox.Cursor = Cursors.Hand;
+            }
+        } 
     }
 }
