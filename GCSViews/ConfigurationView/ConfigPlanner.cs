@@ -456,10 +456,13 @@ namespace MissionPlanner.GCSViews.ConfigurationView
                 key = new Keyboard.KeyboardSetup();
                 ThemeManager.ApplyThemeTo(key);
                 key.FormClosed += new FormClosedEventHandler(key_FormClosed);
+                key.FormClosing += new FormClosingEventHandler(key_FormClosing);
                 key.Show();
             }
             else
             {
+                if (key.Visible == false)
+                    key.Show();
                 if (key.WindowState == FormWindowState.Minimized || key.WindowState == FormWindowState.Maximized)
                     key.WindowState = FormWindowState.Normal;
                 key.Focus();
@@ -468,7 +471,18 @@ namespace MissionPlanner.GCSViews.ConfigurationView
 
         void key_FormClosed(object sender, EventArgs e)
         {
-            key = null;
+            if (!MainV2.keyboard)
+                key = null;
+        }
+
+        void key_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (MainV2.keyboard)
+            {
+                if (e.CloseReason != CloseReason.UserClosing) return;
+                e.Cancel = true;
+                key.Hide();              
+            }
         }
 
         private void CMB_distunits_SelectedIndexChanged(object sender, EventArgs e)
