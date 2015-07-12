@@ -447,32 +447,30 @@ namespace MissionPlanner.GCSViews.ConfigurationView
             joy.Show();
         }
 
-        Form key = null;
-
         private void BUT_Keyboard_Click(object sender, EventArgs e)
         {
-            if (key == null)
+            if (MainV2.keyForm == null)
             {
-                key = new Keyboard.KeyboardSetup();
-                ThemeManager.ApplyThemeTo(key);
-                key.FormClosed += new FormClosedEventHandler(key_FormClosed);
-                key.FormClosing += new FormClosingEventHandler(key_FormClosing);
-                key.Show();
+                MainV2.keyForm = new Keyboard.KeyboardSetup();
+                ThemeManager.ApplyThemeTo(MainV2.keyForm);
+                MainV2.keyForm.FormClosed += new FormClosedEventHandler(key_FormClosed);
+                MainV2.keyForm.FormClosing += new FormClosingEventHandler(key_FormClosing);
+                MainV2.keyForm.Show();
             }
             else
             {
-                if (key.Visible == false)
-                    key.Show();
-                if (key.WindowState == FormWindowState.Minimized || key.WindowState == FormWindowState.Maximized)
-                    key.WindowState = FormWindowState.Normal;
-                key.Focus();
+                if (MainV2.keyForm.Visible == false)
+                    MainV2.keyForm.Show();
+                if (MainV2.keyForm.WindowState == FormWindowState.Minimized || MainV2.keyForm.WindowState == FormWindowState.Maximized)
+                    MainV2.keyForm.WindowState = FormWindowState.Normal;
+                MainV2.keyForm.Focus();
             }           
         }
 
         void key_FormClosed(object sender, EventArgs e)
         {
             if (!MainV2.keyboard)
-                key = null;
+                MainV2.keyForm = null;
         }
 
         void key_FormClosing(object sender, FormClosingEventArgs e)
@@ -481,7 +479,7 @@ namespace MissionPlanner.GCSViews.ConfigurationView
             {
                 if (e.CloseReason != CloseReason.UserClosing) return;
                 e.Cancel = true;
-                key.Hide();              
+                MainV2.keyForm.Hide();              
             }
         }
 
