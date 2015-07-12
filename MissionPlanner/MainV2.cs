@@ -195,9 +195,13 @@ namespace MissionPlanner
         /// </summary>
         public static Joystick.Joystick joystick = null;
         /// <summary>
-        /// keyboard static class
+        /// keyboard static variable
         /// </summary>
         public static bool keyboard = false;
+        /// <summary>
+        /// keyboard static Form 
+        /// </summary>
+        public static Form keyForm = null;
         /// <summary>
         /// track last joystick packet sent. used to control rate
         /// </summary>
@@ -1941,8 +1945,15 @@ namespace MissionPlanner
 
                     try
                     {
-                        if (GCSViews.Terminal.comPort != null && GCSViews.Terminal.comPort.IsOpen)
-                            continue;
+                        if (GCSViews.Terminal.comPort is MAVLinkSerialPort)
+                        {
+
+                        }
+                        else
+                        {
+                            if (GCSViews.Terminal.comPort != null && GCSViews.Terminal.comPort.IsOpen)
+                                continue;
+                        }
                     }
                     catch { }
 
