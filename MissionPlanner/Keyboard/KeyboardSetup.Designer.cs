@@ -35,12 +35,13 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.setModeComboBox = new System.Windows.Forms.ComboBox();
+            this.setModeBox = new System.Windows.Forms.TextBox();
+            this.label20 = new System.Windows.Forms.Label();
             this.desarmBox = new System.Windows.Forms.TextBox();
             this.label16 = new System.Windows.Forms.Label();
             this.armBox = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
-            this.label14 = new System.Windows.Forms.Label();
-            this.label13 = new System.Windows.Forms.Label();
             this.steerRightBox = new System.Windows.Forms.TextBox();
             this.steerLeftBox = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
@@ -75,6 +76,7 @@
             this.label17 = new System.Windows.Forms.Label();
             this.yawTrackBar = new MissionPlanner.Controls.MyTrackBar();
             this.pitchTrackBar = new MissionPlanner.Controls.MyTrackBar();
+            this.BUT_help = new MissionPlanner.Controls.MyButton();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rollTrackBar)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -130,12 +132,13 @@
             // groupBox1
             // 
             this.groupBox1.BackColor = System.Drawing.SystemColors.Control;
+            this.groupBox1.Controls.Add(this.setModeComboBox);
+            this.groupBox1.Controls.Add(this.setModeBox);
+            this.groupBox1.Controls.Add(this.label20);
             this.groupBox1.Controls.Add(this.desarmBox);
             this.groupBox1.Controls.Add(this.label16);
             this.groupBox1.Controls.Add(this.armBox);
             this.groupBox1.Controls.Add(this.label15);
-            this.groupBox1.Controls.Add(this.label14);
-            this.groupBox1.Controls.Add(this.label13);
             this.groupBox1.Controls.Add(this.steerRightBox);
             this.groupBox1.Controls.Add(this.steerLeftBox);
             this.groupBox1.Controls.Add(this.label12);
@@ -155,10 +158,43 @@
             this.groupBox1.ForeColor = System.Drawing.SystemColors.ControlText;
             this.groupBox1.Location = new System.Drawing.Point(296, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(314, 267);
+            this.groupBox1.Size = new System.Drawing.Size(314, 218);
             this.groupBox1.TabIndex = 28;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Controls";
+            // 
+            // setModeComboBox
+            // 
+            this.setModeComboBox.FormattingEnabled = true;
+            this.setModeComboBox.Location = new System.Drawing.Point(171, 174);
+            this.setModeComboBox.Name = "setModeComboBox";
+            this.setModeComboBox.Size = new System.Drawing.Size(121, 21);
+            this.setModeComboBox.TabIndex = 52;
+            // 
+            // setModeBox
+            // 
+            this.setModeBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.setModeBox.Location = new System.Drawing.Point(96, 175);
+            this.setModeBox.Name = "setModeBox";
+            this.setModeBox.ReadOnly = true;
+            this.setModeBox.Size = new System.Drawing.Size(60, 20);
+            this.setModeBox.TabIndex = 51;
+            this.setModeBox.Text = "M";
+            this.setModeBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.setModeBox.Click += new System.EventHandler(this.allTextBox_Click);
+            this.setModeBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.allTextBox_KeyDown);
+            this.setModeBox.Leave += new System.EventHandler(this.allTextBox_Leave);
+            this.setModeBox.MouseEnter += new System.EventHandler(this.allTextBox_MouseEnter);
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label20.Location = new System.Drawing.Point(5, 178);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(53, 13);
+            this.label20.TabIndex = 50;
+            this.label20.Text = "Set Mode";
             // 
             // desarmBox
             // 
@@ -181,9 +217,9 @@
             this.label16.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.label16.Location = new System.Drawing.Point(178, 152);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(43, 13);
+            this.label16.Size = new System.Drawing.Size(39, 13);
             this.label16.TabIndex = 48;
-            this.label16.Text = "Desarm";
+            this.label16.Text = "Disarm";
             // 
             // armBox
             // 
@@ -209,26 +245,6 @@
             this.label15.Size = new System.Drawing.Size(25, 13);
             this.label15.TabIndex = 46;
             this.label15.Text = "Arm";
-            // 
-            // label14
-            // 
-            this.label14.AutoSize = true;
-            this.label14.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label14.Location = new System.Drawing.Point(5, 194);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(110, 13);
-            this.label14.TabIndex = 45;
-            this.label14.Text = "- Press ESC to cancel";
-            // 
-            // label13
-            // 
-            this.label13.AutoSize = true;
-            this.label13.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label13.Location = new System.Drawing.Point(5, 178);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(287, 13);
-            this.label13.TabIndex = 29;
-            this.label13.Text = "- Click on the boxes to change the keyboard controller keys";
             // 
             // steerRightBox
             // 
@@ -642,11 +658,23 @@
             this.pitchTrackBar.TickFrequency = 100F;
             this.pitchTrackBar.Value = 100F;
             // 
+            // BUT_help
+            // 
+            this.BUT_help.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.BUT_help.Location = new System.Drawing.Point(181, 41);
+            this.BUT_help.Name = "BUT_help";
+            this.BUT_help.Size = new System.Drawing.Size(75, 23);
+            this.BUT_help.TabIndex = 31;
+            this.BUT_help.Text = "Help";
+            this.BUT_help.UseVisualStyleBackColor = true;
+            this.BUT_help.Click += new System.EventHandler(this.BUT_help_Click);
+            // 
             // KeyboardSetup
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(676, 320);
+            this.Controls.Add(this.BUT_help);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label4);
@@ -702,8 +730,6 @@
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.TextBox steerRightBox;
-        private System.Windows.Forms.Label label13;
-        private System.Windows.Forms.Label label14;
         private System.Windows.Forms.TextBox desarmBox;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.TextBox armBox;
@@ -721,5 +747,9 @@
         private System.Windows.Forms.Label yawTrackBarMinValue;
         private System.Windows.Forms.Label pitchTrackBarMinValue;
         private System.Windows.Forms.Label rollTrackBarMinValue;
+        private System.Windows.Forms.TextBox setModeBox;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.ComboBox setModeComboBox;
+        private Controls.MyButton BUT_help;
     }
 }

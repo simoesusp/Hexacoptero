@@ -26,10 +26,18 @@ namespace MissionPlanner.Keyboard
         {
             InitializeComponent();
             MissionPlanner.Utilities.Tracking.AddPage(this.GetType().ToString(), this.Text);
+            
         }
 
         public void Keyboard_Load(object sender, EventArgs e)
-        {   
+        {
+            //fixed border
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            //maximize button removed
+            this.MaximizeBox = false;
+            setModeComboBox.DataSource = Common.getModesList(MainV2.comPort.MAV.cs);
+            setModeComboBox.ValueMember = "Key";
+            setModeComboBox.DisplayMember = "Value";
 
             if (MainV2.keyboard)
             {
@@ -38,43 +46,49 @@ namespace MissionPlanner.Keyboard
         }
 
         private void BUT_enable_Click(object sender, EventArgs e)
-        {          
-
+        {
             if (!MainV2.keyboard)
             {
-                MainV2.comPort.MAV.cs.rcoverridech1 = checkChannel(1, "trim");
-                MainV2.comPort.MAV.cs.rcoverridech2 = checkChannel(2, "trim");
-                MainV2.comPort.MAV.cs.rcoverridech3 = checkChannel(3, "min");
-                MainV2.comPort.MAV.cs.rcoverridech4 = checkChannel(4, "trim");
-                try
+                if (MainV2.comPort.BaseStream.IsOpen)
                 {
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), accelerateBox.Text, true));
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), decelerateBox.Text, true));
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), rollLeftBox.Text, true));
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), rollRightBox.Text, true));
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), steerLeftBox.Text, true));
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), steerRightBox.Text, true));
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), pitchForwardBox.Text, true));
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), pitchBackwardBox.Text, true));
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), armBox.Text, true));
-                    gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), desarmBox.Text, true));
-                }
-                catch 
-                {
-                    MainV2.instance.Invoke((System.Action)
-                    delegate
+                    MainV2.comPort.MAV.cs.rcoverridech1 = checkChannel(1, "trim");
+                    MainV2.comPort.MAV.cs.rcoverridech2 = checkChannel(2, "trim");
+                    MainV2.comPort.MAV.cs.rcoverridech3 = checkChannel(3, "min");
+                    MainV2.comPort.MAV.cs.rcoverridech4 = checkChannel(4, "trim");
+                    try
                     {
-                        CustomMessageBox.Show("Please insert a key in all boxes before pressing enable", "Empty Boxes");
-                    });
-                    return;
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), accelerateBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), decelerateBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), rollLeftBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), rollRightBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), steerLeftBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), steerRightBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), pitchForwardBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), pitchBackwardBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), armBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), desarmBox.Text, true));
+                        gkh.HookedKeys.Add((Keys)System.Enum.Parse(typeof(Keys), setModeBox.Text, true));
+                        gkh.HookedKeys.Add(Keys.Control);
+                    }
+                    catch
+                    {
+                        MainV2.instance.Invoke((System.Action)
+                        delegate
+                        {
+                            CustomMessageBox.Show("Please insert a key in all boxes before pressing enable", "Empty Boxes");
+                        });
+                        return;
+                    }
+                    gkh.KeyDown += new KeyEventHandler(gkh_KeyDown);
+                    gkh.KeyUp += new KeyEventHandler(gkh_KeyUp);
+                    gkh.hook();
+                    MainV2.keyboard = true;
+                    BUT_enable.Text = "Disable";
+                    timer1.Start();
+
                 }
-                gkh.KeyDown += new KeyEventHandler(gkh_KeyDown);
-                gkh.KeyUp += new KeyEventHandler(gkh_KeyUp);
-                gkh.hook();
-                MainV2.keyboard = true;
-                BUT_enable.Text = "Disable";
-                timer1.Start();
-                
+                else
+                    CustomMessageBox.Show("Please connect a UAV first", "Open ComPort");
             }
             else
             {
@@ -86,7 +100,7 @@ namespace MissionPlanner.Keyboard
                 clearRCOverride();
                 timer1.Stop();
                 BUT_enable.Text = "Enable";
-            }
+            }            
         }
 
         void gkh_KeyUp(object sender, KeyEventArgs e)
@@ -132,21 +146,55 @@ namespace MissionPlanner.Keyboard
                     catch { CustomMessageBox.Show("Failed to Arm"); }
                 });
             }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), desarmBox.Text, true))
+            {
+                MainV2.instance.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate()
+                {
+                    try
+                    {
+                        MainV2.comPort.doARM(false);
+                    }
+                    catch { CustomMessageBox.Show("Failed to Disarm"); }
+                });
+            }
+            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), setModeBox.Text, true))
+            {
+                MainV2.instance.BeginInvoke((System.Windows.Forms.MethodInvoker)delegate()
+                {
+                    try
+                    {
+                        MainV2.comPort.setMode(setModeComboBox.Text.ToString());
+                    }
+                    catch { CustomMessageBox.Show("Failed to change Modes"); }
+                });
+            }
             if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), rollLeftBox.Text, true))
             {
-                MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(checkChannel(1, "trim") - Convert.ToUInt16(rollTrackBar.Value));
+                if (Control.ModifierKeys == Keys.Control)
+                    MainV2.comPort.MAV.cs.rcoverridech1 = checkChannel(1, "min");
+                else
+                    MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(checkChannel(1, "trim") - Convert.ToUInt16(rollTrackBar.Value));
             }
             if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), rollRightBox.Text, true))
             {
-                MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(checkChannel(1, "trim") + Convert.ToUInt16(rollTrackBar.Value));
+                if (Control.ModifierKeys == Keys.Control)
+                    MainV2.comPort.MAV.cs.rcoverridech1 = checkChannel(1, "max");
+                else
+                    MainV2.comPort.MAV.cs.rcoverridech1 = (ushort)(checkChannel(1, "trim") + Convert.ToUInt16(rollTrackBar.Value));
             }
             if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), pitchForwardBox.Text, true))
             {
-                MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(checkChannel(2, "trim") - Convert.ToUInt16(pitchTrackBar.Value));
+                if (Control.ModifierKeys == Keys.Control)
+                    MainV2.comPort.MAV.cs.rcoverridech2 = checkChannel(2, "min");
+                else
+                    MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(checkChannel(2, "trim") - Convert.ToUInt16(pitchTrackBar.Value));
             }
             if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), pitchBackwardBox.Text, true))
             {
-                MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(checkChannel(2, "trim") + Convert.ToUInt16(pitchTrackBar.Value));
+                if (Control.ModifierKeys == Keys.Control)
+                    MainV2.comPort.MAV.cs.rcoverridech2 = checkChannel(2, "max");
+                else
+                    MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(checkChannel(2, "trim") + Convert.ToUInt16(pitchTrackBar.Value));
             }
             if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), accelerateBox.Text, true))
             {
@@ -160,11 +208,17 @@ namespace MissionPlanner.Keyboard
             }
             if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), steerLeftBox.Text, true))
             {
-                MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(checkChannel(4, "trim") - Convert.ToUInt16(yawTrackBar.Value));
+                if (Control.ModifierKeys == Keys.Control)
+                    MainV2.comPort.MAV.cs.rcoverridech4 = checkChannel(4, "min");
+                else
+                    MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(checkChannel(4, "trim") - Convert.ToUInt16(yawTrackBar.Value));
             }
             if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), steerRightBox.Text, true))
             {
-                MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(checkChannel(4, "trim") + Convert.ToUInt16(yawTrackBar.Value));
+                if(Control.ModifierKeys == Keys.Control)
+                    MainV2.comPort.MAV.cs.rcoverridech4 = checkChannel(4, "max");
+                else
+                    MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(checkChannel(4, "trim") + Convert.ToUInt16(yawTrackBar.Value));
             }
 
         }
@@ -348,7 +402,7 @@ namespace MissionPlanner.Keyboard
             progressBarRoll.Value = MainV2.comPort.MAV.cs.rcoverridech1;
             progressBarPitch.Value = MainV2.comPort.MAV.cs.rcoverridech2;
             progressBarThrottle.Value = MainV2.comPort.MAV.cs.rcoverridech3;
-            progressBarYaw.Value = MainV2.comPort.MAV.cs.rcoverridech4;
+            progressBarYaw.Value = MainV2.comPort.MAV.cs.rcoverridech4;            
 
             try
             {
@@ -419,13 +473,27 @@ namespace MissionPlanner.Keyboard
             TextBox tbox = (TextBox)sender;
             if(!tbox.ReadOnly)
             {
-                if(e.KeyCode == Keys.Escape)                
-                    tbox.Text = auxText;                
-                else
-                    tbox.AppendText(e.KeyCode.ToString());
+                switch(e.KeyCode)
+                {
+                    case Keys.ControlKey:
+                        CustomMessageBox.Show("Control Key not allowed.", "Warning");
+                        tbox.Text = auxText;
+                        break;
+                    case Keys.LControlKey:
+                        CustomMessageBox.Show("Control Key not allowed.", "Warning");
+                        tbox.Text = auxText;
+                        break;
+                    case Keys.Escape:
+                        tbox.Text = auxText;
+                        break;
+                    default:
+                        tbox.AppendText(e.KeyCode.ToString());
+                        break;
+                }
                 tbox.BackColor = ThemeManager.ControlBGColor;
                 tbox.ForeColor = ThemeManager.TextColor;
                 tbox.ReadOnly = true;
+                
             }
         }
 
@@ -452,6 +520,12 @@ namespace MissionPlanner.Keyboard
             {
                 tbox.Cursor = Cursors.Hand;
             }
-        } 
+        }
+
+        private void BUT_help_Click(object sender, EventArgs e)
+        {
+            new Keyboard_Help().ShowDialog();
+        }
+
     }
 }
