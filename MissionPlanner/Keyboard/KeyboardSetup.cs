@@ -20,7 +20,7 @@ namespace MissionPlanner.Keyboard
         [DllImport("user32.dll")]
         static extern bool HideCaret(IntPtr hWnd);
 
-        globalKeyboardHook gkh = new globalKeyboardHook();
+        globalKeyboardHook gkh =  globalKeyboardHook.UniqueInstance;
 
         public KeyboardSetup()
         {
@@ -43,6 +43,11 @@ namespace MissionPlanner.Keyboard
             {
                 BUT_enable.Text = "Disable";
             }
+
+            if (MainV2.comPort.BaseStream.IsOpen)
+            {
+                lblVehicleConnected.Text = MainV2.comPort.MAV.aptype.ToString();
+            }
         }
 
         private void BUT_enable_Click(object sender, EventArgs e)
@@ -51,6 +56,7 @@ namespace MissionPlanner.Keyboard
             {
                 if (MainV2.comPort.BaseStream.IsOpen)
                 {
+                    lblVehicleConnected.Text = MainV2.comPort.MAV.aptype.ToString();
                     MainV2.comPort.MAV.cs.rcoverridech1 = checkChannel(1, "trim");
                     MainV2.comPort.MAV.cs.rcoverridech2 = checkChannel(2, "trim");
                     MainV2.comPort.MAV.cs.rcoverridech3 = checkChannel(3, "min");
@@ -130,7 +136,18 @@ namespace MissionPlanner.Keyboard
             {
                 MainV2.comPort.MAV.cs.rcoverridech4 = checkChannel(4, "trim");
             }
-       
+            if (MainV2.comPort.MAV.aptype == MAVLink.MAV_TYPE.GROUND_ROVER)
+            {
+                if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), accelerateBox.Text, true))
+                {
+                    MainV2.comPort.MAV.cs.rcoverridech3 = checkChannel(3, "trim");
+                }
+                if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), decelerateBox.Text, true))
+                {
+                    MainV2.comPort.MAV.cs.rcoverridech3 = checkChannel(3, "trim");
+                }
+            }
+            e.Handled = true;       
         }
 
         void gkh_KeyDown(object sender, KeyEventArgs e)
@@ -196,15 +213,37 @@ namespace MissionPlanner.Keyboard
                 else
                     MainV2.comPort.MAV.cs.rcoverridech2 = (ushort)(checkChannel(2, "trim") + Convert.ToUInt16(pitchTrackBar.Value));
             }
-            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), accelerateBox.Text, true))
+            if (MainV2.comPort.MAV.aptype == MAVLink.MAV_TYPE.GROUND_ROVER)
             {
-                if (MainV2.comPort.MAV.cs.rcoverridech3 < checkChannel(3, "max"))
-                    MainV2.comPort.MAV.cs.rcoverridech3 += (ushort)(100);
+                if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), accelerateBox.Text, true))
+                {
+                    if (Control.ModifierKeys == Keys.Control)
+                        MainV2.comPort.MAV.cs.rcoverridech3 = checkChannel(3, "min");
+                    else
+                        MainV2.comPort.MAV.cs.rcoverridech3 = (ushort)(checkChannel(3, "trim") - Convert.ToUInt16(throttleTrackBar.Value));
+                }
+                if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), decelerateBox.Text, true))
+                {
+                    if (Control.ModifierKeys == Keys.Control)
+                        MainV2.comPort.MAV.cs.rcoverridech3 = checkChannel(3, "max");
+                    else
+                        MainV2.comPort.MAV.cs.rcoverridech3 = (ushort)(checkChannel(3, "trim") + Convert.ToUInt16(throttleTrackBar.Value));
+                }
+                
             }
-            if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), decelerateBox.Text, true))
+            else
             {
-                if (MainV2.comPort.MAV.cs.rcoverridech3 > checkChannel(3, "min"))
-                    MainV2.comPort.MAV.cs.rcoverridech3 -= (ushort)(100);
+                if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), accelerateBox.Text, true))
+                {
+                    if (MainV2.comPort.MAV.cs.rcoverridech3 < checkChannel(3, "max"))
+                        MainV2.comPort.MAV.cs.rcoverridech3 += (ushort)(100);
+                }
+                if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), decelerateBox.Text, true))
+                {
+                    if (MainV2.comPort.MAV.cs.rcoverridech3 > checkChannel(3, "min"))
+                        MainV2.comPort.MAV.cs.rcoverridech3 -= (ushort)(100);
+                }
+
             }
             if (e.KeyCode == (Keys)System.Enum.Parse(typeof(Keys), steerLeftBox.Text, true))
             {
@@ -220,7 +259,7 @@ namespace MissionPlanner.Keyboard
                 else
                     MainV2.comPort.MAV.cs.rcoverridech4 = (ushort)(checkChannel(4, "trim") + Convert.ToUInt16(yawTrackBar.Value));
             }
-
+            e.Handled = true;
         }
 
         public void clearRCOverride()
@@ -428,16 +467,20 @@ namespace MissionPlanner.Keyboard
                 rollTrackBar.Maximum = (checkChannel(1, "max")- checkChannel(1, "min"))/2;
                 pitchTrackBar.Maximum = (checkChannel(2, "max") - checkChannel(2, "min"))/2;
                 yawTrackBar.Maximum = (checkChannel(4, "max") - checkChannel(4, "min"))/2;
+                throttleTrackBar.Maximum = (checkChannel(3, "max") - checkChannel(3, "min")) / 2;
                 rollTrackBarMaxValue.Text = rollTrackBar.Maximum.ToString();
                 pitchTrackBarMaxValue.Text = pitchTrackBar.Maximum.ToString();
                 yawTrackBarMaxValue.Text = yawTrackBar.Maximum.ToString();
+                throttleTrackBarMaxValue.Text = throttleTrackBar.Maximum.ToString();       
 
                 rollTrackBar.Minimum = 100;
                 pitchTrackBar.Minimum = 100;
                 yawTrackBar.Minimum = 100;
+                throttleTrackBar.Minimum = 100;
                 rollTrackBarMinValue.Text = rollTrackBar.Minimum.ToString();
                 pitchTrackBarMinValue.Text = pitchTrackBar.Minimum.ToString();
                 yawTrackBarMinValue.Text = yawTrackBar.Minimum.ToString();
+                throttleTrackBarMinValue.Text = throttleTrackBar.Minimum.ToString();
 
             }
             catch

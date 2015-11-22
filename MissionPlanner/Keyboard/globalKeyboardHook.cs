@@ -45,6 +45,9 @@ namespace MissionPlanner.Keyboard
         /// Handle to the hook, need this to unhook and call the next hook
         /// </summary>
         IntPtr hhook = IntPtr.Zero;
+        /// <sumary>
+        /// Singleton object
+        /// </sumary>
         #endregion
 
         #region Events
@@ -62,10 +65,17 @@ namespace MissionPlanner.Keyboard
         /// <summary>
         /// Initializes a new instance of the <see cref="globalKeyboardHook"/> class and installs the keyboard hook.
         /// </summary>
-        public globalKeyboardHook()
+        private globalKeyboardHook()
         {
             khp = new keyboardHookProc(hookProc);
-            //hook();
+            //hook();            
+        }
+
+        static readonly globalKeyboardHook instance = new globalKeyboardHook();
+
+        public static globalKeyboardHook UniqueInstance
+        {
+            get { return instance; }
         }
 
         /// <summary>

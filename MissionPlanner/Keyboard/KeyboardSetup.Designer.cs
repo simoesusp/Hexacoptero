@@ -77,11 +77,18 @@
             this.yawTrackBar = new MissionPlanner.Controls.MyTrackBar();
             this.pitchTrackBar = new MissionPlanner.Controls.MyTrackBar();
             this.BUT_help = new MissionPlanner.Controls.MyButton();
+            this.throttleTrackBar = new MissionPlanner.Controls.MyTrackBar();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.lblVehicleConnected = new System.Windows.Forms.Label();
+            this.throttleTrackBarMinValue = new System.Windows.Forms.Label();
+            this.throttleTrackBarMaxValue = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rollTrackBar)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.yawTrackBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pitchTrackBar)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.throttleTrackBar)).BeginInit();
             this.SuspendLayout();
             // 
             // timer1
@@ -410,6 +417,7 @@
             this.decelerateBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.decelerateBox.Click += new System.EventHandler(this.allTextBox_Click);
             this.decelerateBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.allTextBox_KeyDown);
+            this.decelerateBox.Leave += new System.EventHandler(this.allTextBox_Leave);
             this.decelerateBox.MouseEnter += new System.EventHandler(this.allTextBox_MouseEnter);
             // 
             // label6
@@ -435,6 +443,7 @@
             this.accelerateBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.accelerateBox.Click += new System.EventHandler(this.allTextBox_Click);
             this.accelerateBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.allTextBox_KeyDown);
+            this.accelerateBox.Leave += new System.EventHandler(this.allTextBox_Leave);
             this.accelerateBox.MouseEnter += new System.EventHandler(this.allTextBox_MouseEnter);
             // 
             // label5
@@ -449,6 +458,7 @@
             // 
             // progressBarYaw
             // 
+            this.progressBarYaw.DrawLabel = true;
             this.progressBarYaw.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.progressBarYaw.Label = null;
             this.progressBarYaw.Location = new System.Drawing.Point(55, 99);
@@ -461,6 +471,7 @@
             // 
             // progressBarThrottle
             // 
+            this.progressBarThrottle.DrawLabel = true;
             this.progressBarThrottle.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.progressBarThrottle.Label = null;
             this.progressBarThrottle.Location = new System.Drawing.Point(55, 70);
@@ -484,6 +495,7 @@
             // 
             // progressBarPitch
             // 
+            this.progressBarPitch.DrawLabel = true;
             this.progressBarPitch.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.progressBarPitch.Label = null;
             this.progressBarPitch.Location = new System.Drawing.Point(55, 41);
@@ -497,6 +509,7 @@
             // 
             // progressBarRoll
             // 
+            this.progressBarRoll.DrawLabel = true;
             this.progressBarRoll.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.progressBarRoll.Label = null;
             this.progressBarRoll.Location = new System.Drawing.Point(55, 12);
@@ -523,6 +536,10 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.throttleTrackBarMaxValue);
+            this.groupBox2.Controls.Add(this.throttleTrackBarMinValue);
+            this.groupBox2.Controls.Add(this.label13);
+            this.groupBox2.Controls.Add(this.throttleTrackBar);
             this.groupBox2.Controls.Add(this.yawTrackBarMaxValue);
             this.groupBox2.Controls.Add(this.pitchTrackBarMaxValue);
             this.groupBox2.Controls.Add(this.rollTrackBarMaxValue);
@@ -537,7 +554,7 @@
             this.groupBox2.Controls.Add(this.rollTrackBar);
             this.groupBox2.Location = new System.Drawing.Point(13, 128);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(243, 180);
+            this.groupBox2.Size = new System.Drawing.Size(243, 233);
             this.groupBox2.TabIndex = 30;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Factors";
@@ -669,11 +686,76 @@
             this.BUT_help.UseVisualStyleBackColor = true;
             this.BUT_help.Click += new System.EventHandler(this.BUT_help_Click);
             // 
+            // throttleTrackBar
+            // 
+            this.throttleTrackBar.LargeChange = 0.005F;
+            this.throttleTrackBar.Location = new System.Drawing.Point(86, 180);
+            this.throttleTrackBar.Maximum = 500F;
+            this.throttleTrackBar.Minimum = 100F;
+            this.throttleTrackBar.Name = "throttleTrackBar";
+            this.throttleTrackBar.Size = new System.Drawing.Size(104, 45);
+            this.throttleTrackBar.SmallChange = 0F;
+            this.throttleTrackBar.TabIndex = 40;
+            this.throttleTrackBar.TickFrequency = 100F;
+            this.throttleTrackBar.Value = 100F;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label13.Location = new System.Drawing.Point(6, 180);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(76, 13);
+            this.label13.TabIndex = 41;
+            this.label13.Text = "Throttle Factor";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.label14.Location = new System.Drawing.Point(301, 247);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(100, 13);
+            this.label14.TabIndex = 42;
+            this.label14.Text = "Vehicle Connected:";
+            // 
+            // lblVehicleConnected
+            // 
+            this.lblVehicleConnected.AutoSize = true;
+            this.lblVehicleConnected.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.lblVehicleConnected.Location = new System.Drawing.Point(398, 247);
+            this.lblVehicleConnected.Name = "lblVehicleConnected";
+            this.lblVehicleConnected.Size = new System.Drawing.Size(38, 13);
+            this.lblVehicleConnected.TabIndex = 43;
+            this.lblVehicleConnected.Text = "NONE";
+            // 
+            // throttleTrackBarMinValue
+            // 
+            this.throttleTrackBarMinValue.AutoSize = true;
+            this.throttleTrackBarMinValue.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.throttleTrackBarMinValue.Location = new System.Drawing.Point(93, 212);
+            this.throttleTrackBarMinValue.Name = "throttleTrackBarMinValue";
+            this.throttleTrackBarMinValue.Size = new System.Drawing.Size(13, 13);
+            this.throttleTrackBarMinValue.TabIndex = 42;
+            this.throttleTrackBarMinValue.Text = "0";
+            // 
+            // throttleTrackBarMaxValue
+            // 
+            this.throttleTrackBarMaxValue.AutoSize = true;
+            this.throttleTrackBarMaxValue.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.throttleTrackBarMaxValue.Location = new System.Drawing.Point(170, 212);
+            this.throttleTrackBarMaxValue.Name = "throttleTrackBarMaxValue";
+            this.throttleTrackBarMaxValue.Size = new System.Drawing.Size(13, 13);
+            this.throttleTrackBarMaxValue.TabIndex = 43;
+            this.throttleTrackBarMaxValue.Text = "0";
+            // 
             // KeyboardSetup
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(676, 320);
+            this.ClientSize = new System.Drawing.Size(878, 395);
+            this.Controls.Add(this.lblVehicleConnected);
+            this.Controls.Add(this.label14);
             this.Controls.Add(this.BUT_help);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -687,6 +769,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.progressBarRoll);
             this.Name = "KeyboardSetup";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Keyboard Controller";
             this.Load += new System.EventHandler(this.Keyboard_Load);
             this.groupBox1.ResumeLayout(false);
@@ -696,6 +779,7 @@
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.yawTrackBar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pitchTrackBar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.throttleTrackBar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -751,5 +835,11 @@
         private System.Windows.Forms.Label label20;
         private System.Windows.Forms.ComboBox setModeComboBox;
         private Controls.MyButton BUT_help;
+        private System.Windows.Forms.Label label13;
+        private Controls.MyTrackBar throttleTrackBar;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label lblVehicleConnected;
+        private System.Windows.Forms.Label throttleTrackBarMaxValue;
+        private System.Windows.Forms.Label throttleTrackBarMinValue;
     }
 }
